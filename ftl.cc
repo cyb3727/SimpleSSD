@@ -1,3 +1,12 @@
+//
+//  FTL.cpp
+//  FTL-3
+//
+//  Created by Narges on 7/3/15.
+//  Copyright (c) 2015 narges shahidi. All rights reserved.
+//
+//  Modified by Donghyun Gouk <kukdh1@camelab.org>
+//
 
 #include "ftl.hh"
 #include "ftl_statistics.hh"
@@ -73,10 +82,12 @@ Tick FTL::write(Addr lpn, size_t npages, Tick arrived, bool init) {
     FTLmapping->GarbageCollection();
   }
 
-  Command cmd = Command(arrived, lpn, OPER_WRITE, param->page_byte * npages);
-  cmd.finished = finished;
+  if (!init) {
+    Command cmd = Command(arrived, lpn, OPER_WRITE, param->page_byte * npages);
+    cmd.finished = finished;
 
-  ftl_statistics.updateStats(&cmd);
+    ftl_statistics.updateStats(&cmd);
+  }
 
   return finished - arrived;
 }
