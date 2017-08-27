@@ -1,12 +1,3 @@
-//
-//  FTL.cpp
-//  FTL-3
-//
-//  Created by Narges on 7/3/15.
-//  Copyright (c) 2015 narges shahidi. All rights reserved.
-//
-//  Modified by Donghyun Gouk <kukdh1@camelab.org>
-//
 
 #include "ftl.hh"
 #include "ftl_statistics.hh"
@@ -44,13 +35,15 @@ void FTL::initialize(){
 
 Tick FTL::read(Addr lpn, size_t npages, Tick arrived) {
   Tick finished = 0;
+  Tick oneReq;
   Addr ppn;
 
   ftl_statistics.read_req_arrive(arrived);
 
   for (size_t i = 0; i < npages; i++) {
     FTLmapping->read(lpn + i, ppn);
-    finished = MAX(readInternal(ppn, arrived), finished);
+    oneReq = readInternal(ppn, arrived);
+    finished = MAX(oneReq, finished);
   }
 
   Command cmd = Command(arrived, lpn, OPER_READ, param->page_byte * npages);
@@ -63,6 +56,7 @@ Tick FTL::read(Addr lpn, size_t npages, Tick arrived) {
 
 Tick FTL::write(Addr lpn, size_t npages, Tick arrived, bool init) {
   Tick finished = 0;
+  Tick oneReq;
   Addr ppn;
 
   ftl_statistics.write_req_arrive(arrived);
@@ -70,7 +64,8 @@ Tick FTL::write(Addr lpn, size_t npages, Tick arrived, bool init) {
   for (size_t i = 0; i < npages; i++) {
     FTLmapping->write(lpn + i, ppn);
     if (!init) {
-      finished = MAX(writeInternal(ppn, arrived), finished);
+      oneReq = writeInternal(ppn, arrived);
+      finished = MAX(oneReq, finished);
     }
   }
 
